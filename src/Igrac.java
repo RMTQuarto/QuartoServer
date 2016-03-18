@@ -10,6 +10,7 @@ public class Igrac implements Runnable {
 	PrintStream izlazniTok;
 	String ime;
 	Thread t;
+	volatile boolean aktivan;
 	public Igrac(Socket soket) {
 
 		try {
@@ -30,8 +31,7 @@ public class Igrac implements Runnable {
 
 	public void run() {
 		try {
-			// ima dosta gresaka, neki slucajevi nisu pokriveni
-			while (true) {
+			while (aktivan) {
 				String[] podaci = ulazniTok.readLine().split(";");
 				String protivnik = podaci[0];
 				if (podaci[1].equals("1")) {
@@ -56,8 +56,19 @@ public class Igrac implements Runnable {
 	public String toString() {
 		return ime;
 	}
-
+	void zavrsiIgru(){
+		
+	}
 	void igraj() {
-
+		try {
+			wait();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void zavrsiSesiju(){
+		aktivan=false;
+		MainServer.igraci.remove(this);
 	}
 }
