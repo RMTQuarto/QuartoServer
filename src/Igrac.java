@@ -10,7 +10,6 @@ public class Igrac implements Runnable {
 	PrintStream izlazniTok;
 	String ime;
 	Thread t;
-
 	public Igrac(Socket soket) {
 
 		try {
@@ -37,10 +36,11 @@ public class Igrac implements Runnable {
 				String protivnik = podaci[0];
 				if (podaci[1].equals("1")) {
 					MainServer.posaljiPozivnicu(ime, protivnik);
-					
+					if(ulazniTok.readLine().equals("D")){
+						igraj();
+					}
 				} else {
 					if (podaci[2].equals("D")) {
-						
 						MainServer.napraviIgru(ime, protivnik);
 						igraj();
 					}

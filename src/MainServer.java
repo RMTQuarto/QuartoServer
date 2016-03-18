@@ -45,6 +45,7 @@ public class MainServer {
 		}
 	}
 	public static void napraviIgru(String igrac1, String igrac2){
+		nadjiIgraca(igrac2).izlazniTok.print("D");
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]==null){
 				igre[i]=new Igra(nadjiIgraca(igrac1),nadjiIgraca(igrac2));
