@@ -3,13 +3,29 @@ public class Figura {
 	private char boja; //C - crna, B - bela
 	private char oblik; //K - kockast, V - valjkast
 	private char supljina; //S - supljina, P - puna
-	private char visina; //V - visok, N - nizak
+	private char visina; //D - dug, N - nizak
 	
 	public Figura(char boja, char oblik, char supljina, char visina) {
 		this.boja = boja;
 		this.oblik = oblik;
 		this.supljina = supljina;
 		this.visina = visina; 
+	}
+	
+	public char getBoja() {
+		return boja;
+	}
+
+	public char getOblik() {
+		return oblik;
+	}
+
+	public char getSupljina() {
+		return supljina;
+	}
+
+	public char getVisina() {
+		return visina;
 	}
 
 	public boolean equals(Object obj) {
