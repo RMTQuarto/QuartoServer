@@ -10,7 +10,7 @@ public class Igrac implements Runnable {
 	PrintStream izlazniTok;
 	String ime;
 	Thread t;
-	volatile boolean aktivan;
+	
 	public Igrac(Socket soket) {
 
 		try {
@@ -28,11 +28,15 @@ public class Igrac implements Runnable {
 		}
 
 	}
-
+	//treba obraditi jos dosta toga
 	public void run() {
 		try {
-			while (aktivan) {
+			while (true) {
 				String[] podaci = ulazniTok.readLine().split(";");
+				if(podaci.length==1){
+					MainServer.igraci.remove(this);
+					break;
+				}
 				String protivnik = podaci[0];
 				if (podaci[1].equals("1")) {
 					MainServer.posaljiPozivnicu(ime, protivnik);
@@ -67,8 +71,5 @@ public class Igrac implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	public void zavrsiSesiju(){
-		aktivan=false;
-		MainServer.igraci.remove(this);
-	}
+	
 }
