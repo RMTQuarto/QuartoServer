@@ -7,10 +7,18 @@ public class Igra implements Runnable{
 		this.igrac1=igrac1;
 		this.igrac2=igrac2;
 		tabla=new Tabla();
+		figure=new Figure();
+		posaljiStanje();
 	}
 	public void run() {
 		// TODO Auto-generated method stub
 		
+	}
+	public void posaljiStanje(){
+		igrac1.izlazniTok.println(tabla);
+		igrac2.izlazniTok.println(tabla);
+		igrac1.izlazniTok.println(figure);
+		igrac2.izlazniTok.println(figure);
 	}
 	
 }

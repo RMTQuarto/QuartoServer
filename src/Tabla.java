@@ -61,4 +61,16 @@ public class Tabla {
 		}
 		return false;
 	}
+	@Override
+	public String toString() {
+		String tekst="";
+		for (int i = 0; i < brojPoljaNaJednojOsi; i++) {
+			for (int j = 0; j < brojPoljaNaJednojOsi; j++) {
+				if(tabla[i][j]!=null){
+					tekst+=i+j+tabla[i][j].toString()+";";
+				}
+			}
+		}
+		return tekst;
+	}
 }

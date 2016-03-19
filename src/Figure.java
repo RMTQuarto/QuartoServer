@@ -1,3 +1,5 @@
+import java.util.Iterator;
+
 public class Figure {
 	private Figura figura1;
 	private Figura figura2;
@@ -64,5 +66,14 @@ public class Figure {
 				break;
 			}
 		}
+	}
+	@Override
+	public String toString() {
+		String tekst="";
+		for (Figura figura : figure) {
+			if(figura!=null)
+				tekst+=figura+";";
+		}
+		return tekst;
 	}
 }

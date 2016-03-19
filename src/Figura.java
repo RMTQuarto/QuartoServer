@@ -41,6 +41,9 @@ public class Figura {
 			return true;
 		return false;
 	}
-	
+	@Override
+	public String toString() {
+		return boja+oblik+supljina+visina+"";
+	}
 	
 }
