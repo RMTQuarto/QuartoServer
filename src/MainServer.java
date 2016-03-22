@@ -37,23 +37,30 @@ public class MainServer {
 		return lista;
 	}
 	public static void posaljiPozivnicu(String pozivac, String protivnik){
-		for (Igrac igrac : igraci) {
-			if(igrac.ime.equals(protivnik)) {
-				igrac.izlazniTok.println(pozivac);
+		nadjiIgraca(protivnik).izlazniTok.println(pozivac);
+	}
+	
+	public static void napraviIgru(String igrac1, String igrac2){
+		Igrac igr1=nadjiIgraca(igrac1);
+		Igrac igr2=nadjiIgraca(igrac2);
+		for (int i = 0; i < igre.length; i++) {
+			if(igre[i]==null){
+				igre[i]=new Igra(igr1,igr2);
+				uvediIgraceUIgru(igr1,igr2);
+				posaljiListuSlobodnihIgraca();
 				break;
+			}
+			if(i==igre.length-1){
+				//obavesti ih da je pun server
 			}
 		}
 	}
-	public static void napraviIgru(String igrac1, String igrac2){
-		nadjiIgraca(igrac2).izlazniTok.print("D");
-		for (int i = 0; i < igre.length; i++) {
-			if(igre[i]==null){
-				igre[i]=new Igra(nadjiIgraca(igrac1),nadjiIgraca(igrac2));
-				igraci.remove(nadjiIgraca(igrac1));
-				igraci.remove(nadjiIgraca(igrac2));
-				break;
-			}
-		}
+	private static void uvediIgraceUIgru(Igrac igr1,Igrac igr2){
+		//igr2.izlazniTok.println(Igrac.PRIHVACENA_IGRA);
+		igr1.igraj();
+		igr2.igraj();
+		igraci.remove(igr1);
+		igraci.remove(igr2);
 	}
 	public static Igrac nadjiIgraca(String ime){
 		for (Igrac igrac : igraci) {

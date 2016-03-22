@@ -10,6 +10,11 @@ public class Igrac implements Runnable {
 	PrintStream izlazniTok;
 	String ime;
 	Thread t;
+	boolean zauzet;
+	public final static String POZIVAC="1";
+	public final static String PRIHVACENA_IGRA="D";
+	
+	
 	
 	public Igrac(Socket soket) {
 
@@ -19,6 +24,7 @@ public class Igrac implements Runnable {
 			izlazniTok = new PrintStream(soket.getOutputStream());
 			ime = ulazniTok.readLine();
 			MainServer.posaljiListuSlobodnihIgraca();
+			zauzet=false;
 			t = new Thread(this);
 			t.setDaemon(true);
 			t.start();
@@ -28,25 +34,31 @@ public class Igrac implements Runnable {
 		}
 
 	}
-	//treba obraditi jos dosta toga
+	
+	// ostalo je par nezgoodnih situacija
 	public void run() {
 		try {
 			while (true) {
 				String[] podaci = ulazniTok.readLine().split(";");
-				if(podaci.length==1){
+				if(zauzet){
+					if(hoceDaPovucePoziv(podaci)){
+						zauzet=false;
+					}
+					continue;
+				}
+				if(hoceDaSeDiskonektuje(podaci)){
 					MainServer.igraci.remove(this);
 					break;
 				}
 				String protivnik = podaci[0];
-				if (podaci[1].equals("1")) {
+				String tipIgraca=podaci[1];
+				String prihvacenaIgra=podaci[2];
+				if (tipIgraca.equals(Igrac.POZIVAC)) {
 					MainServer.posaljiPozivnicu(ime, protivnik);
-					if(ulazniTok.readLine().equals("D")){
-						igraj();
-					}
+					zauzet=true;
 				} else {
-					if (podaci[2].equals("D")) {
+					if (prihvacenaIgra.equals(Igrac.PRIHVACENA_IGRA)) {
 						MainServer.napraviIgru(ime, protivnik);
-						igraj();
 					}
 				}
 			}
@@ -61,8 +73,9 @@ public class Igrac implements Runnable {
 		return ime;
 	}
 	void zavrsiIgru(){
-		
+		zauzet=false;
 	}
+	
 	void igraj() {
 		try {
 			wait();
@@ -70,6 +83,18 @@ public class Igrac implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	boolean hoceDaSeDiskonektuje(String[] niz){
+		return niz.length==1;
+	}
+	@Override
+	public boolean equals(Object o) {
+		if(!(o instanceof Igrac))return false;
+		Igrac i=(Igrac) o;
+		return ime.equals(i.ime);
+	}
+	boolean hoceDaPovucePoziv(String[] niz){
+		return (niz.length==1);
 	}
 	
 }
