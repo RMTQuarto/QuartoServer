@@ -57,6 +57,13 @@ public class MainServer {
 			}
 		}
 	}
+	public static void napraviPonovnuIgru(Igra igra){
+		for (int i = 0; i < igre.length; i++) {
+			if(igre[i]!=null && igre[i].equals(igra)){
+				igre[i]=new Igra(igra.igrac1,igra.igrac2,!igra.igrac1PocinjeIgru);
+			}
+		}
+	}
 	private static void uvediIgraceUIgru(Igrac igr1,Igrac igr2){
 		//igr2.izlazniTok.println(Igrac.PRIHVACENA_IGRA);
 		igr1.igraj();
@@ -72,7 +79,13 @@ public class MainServer {
 		}
 		return null;
 	}
-	public void ukiniIgru(Igra igra){
-		
+	public static void ukiniIgru(Igra igra){
+		igraci.add(igra.igrac1);
+		igraci.add(igra.igrac2);
+		for (int i = 0; i < igre.length; i++) {
+			if(igre[i]!=null && igre[i].equals(igra)){
+				igre[i]=null;
+			}
+		}
 	}
 }

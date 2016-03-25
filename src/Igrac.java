@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 
-public class Igrac implements Runnable {
+public class Igrac implements Runnable{
 	Socket soket;
 	BufferedReader ulazniTok;
 	PrintStream izlazniTok;
@@ -17,7 +17,7 @@ public class Igrac implements Runnable {
 	
 	
 	public Igrac(Socket soket) {
-
+		
 		try {
 			this.soket = soket;
 			ulazniTok = new BufferedReader(new InputStreamReader(soket.getInputStream()));
@@ -42,7 +42,7 @@ public class Igrac implements Runnable {
 
 	}
 	
-	// ostalo je par nezgoodnih situacija
+
 	public void run() {
 		try {
 			while (true) {
@@ -58,7 +58,7 @@ public class Igrac implements Runnable {
 					MainServer.igraci.remove(this);
 					break;
 				}
-				String protivnik = podaci[0];
+				String protivnik=podaci[0];
 				String tipIgraca=podaci[1];
 				String prihvacenaIgra=podaci[2];
 				if (tipIgraca.equals(Igrac.POZIVAC)) {
@@ -81,6 +81,7 @@ public class Igrac implements Runnable {
 		return ime;
 	}
 	void zavrsiIgru(){
+		notify();
 		poslaoPoziv=false;
 	}
 	
@@ -93,7 +94,7 @@ public class Igrac implements Runnable {
 		}
 	}
 	boolean hoceDaSeDiskonektuje(String[] niz){
-		return niz.length==1;
+		return niz[0].equals("KRAJ");
 	}
 	@Override
 	public boolean equals(Object o) {
@@ -102,8 +103,9 @@ public class Igrac implements Runnable {
 		return ime.equals(i.ime);
 	}
 	boolean hoceDaPovucePoziv(String[] niz){
-		return niz.length==1;
+		return niz[0].equals("POVUCI POZIV");
 	}
+
 	void zatvoriVeze(){
 		try {
 			ulazniTok.close();
