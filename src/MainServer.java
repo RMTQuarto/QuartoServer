@@ -16,7 +16,7 @@ public class MainServer {
 			ServerSocket soketZaOsluskivanje = new ServerSocket(MainServer.BROJ_PORTA);
 			while (true) {
 				Socket soket = soketZaOsluskivanje.accept();
-				igraci.add(new Igrac(soket));
+				new Igrac(soket);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -48,10 +48,12 @@ public class MainServer {
 				igre[i]=new Igra(igr1,igr2);
 				uvediIgraceUIgru(igr1,igr2);
 				posaljiListuSlobodnihIgraca();
+				igre[i].pocni();
 				break;
 			}
 			if(i==igre.length-1){
-				//obavesti ih da je pun server
+				igr1.izlazniTok.println("SERVER JE PUN, MOLIMO SACEKAJTE");
+				igr2.izlazniTok.println("SERVER JE PUN, MOLIMO SACEKAJTE");
 			}
 		}
 	}
@@ -69,5 +71,8 @@ public class MainServer {
 			}
 		}
 		return null;
+	}
+	public void ukiniIgru(Igra igra){
+		
 	}
 }

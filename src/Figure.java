@@ -76,4 +76,10 @@ public class Figure {
 		}
 		return tekst;
 	}
+	public Figura nadjiFiguru(String tekst){
+		for (Figura figura : figure) {
+			if(figura.toString().equals(tekst)) return figura;
+		}
+		return null;
+	}
 }

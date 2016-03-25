@@ -10,10 +10,10 @@ public class Igrac implements Runnable {
 	PrintStream izlazniTok;
 	String ime;
 	Thread t;
-	boolean zauzet;
+	boolean poslaoPoziv;
 	public final static String POZIVAC="1";
 	public final static String PRIHVACENA_IGRA="D";
-	
+	boolean naPotezu;
 	
 	
 	public Igrac(Socket soket) {
@@ -23,8 +23,15 @@ public class Igrac implements Runnable {
 			ulazniTok = new BufferedReader(new InputStreamReader(soket.getInputStream()));
 			izlazniTok = new PrintStream(soket.getOutputStream());
 			ime = ulazniTok.readLine();
+			if(MainServer.igraci.contains(this)) {
+				izlazniTok.println("POSTOJI IGRAC SA ISTIM IMENOM, MORATE UNETI DRUGO IME");
+				zatvoriVeze();
+				return;
+			}else{
+				MainServer.igraci.add(this);
+			}
 			MainServer.posaljiListuSlobodnihIgraca();
-			zauzet=false;
+			poslaoPoziv=false;
 			t = new Thread(this);
 			t.setDaemon(true);
 			t.start();
@@ -40,13 +47,14 @@ public class Igrac implements Runnable {
 		try {
 			while (true) {
 				String[] podaci = ulazniTok.readLine().split(";");
-				if(zauzet){
+				if(poslaoPoziv){
 					if(hoceDaPovucePoziv(podaci)){
-						zauzet=false;
+						poslaoPoziv=false;
 					}
 					continue;
 				}
 				if(hoceDaSeDiskonektuje(podaci)){
+					zatvoriVeze();
 					MainServer.igraci.remove(this);
 					break;
 				}
@@ -55,7 +63,7 @@ public class Igrac implements Runnable {
 				String prihvacenaIgra=podaci[2];
 				if (tipIgraca.equals(Igrac.POZIVAC)) {
 					MainServer.posaljiPozivnicu(ime, protivnik);
-					zauzet=true;
+					poslaoPoziv=true;
 				} else {
 					if (prihvacenaIgra.equals(Igrac.PRIHVACENA_IGRA)) {
 						MainServer.napraviIgru(ime, protivnik);
@@ -73,7 +81,7 @@ public class Igrac implements Runnable {
 		return ime;
 	}
 	void zavrsiIgru(){
-		zauzet=false;
+		poslaoPoziv=false;
 	}
 	
 	void igraj() {
@@ -94,7 +102,17 @@ public class Igrac implements Runnable {
 		return ime.equals(i.ime);
 	}
 	boolean hoceDaPovucePoziv(String[] niz){
-		return (niz.length==1);
+		return niz.length==1;
 	}
-	
+	void zatvoriVeze(){
+		try {
+			ulazniTok.close();
+			izlazniTok.close();
+			soket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 }
