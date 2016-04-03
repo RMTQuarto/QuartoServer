@@ -46,7 +46,7 @@ public class MainServer {
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]==null){
 				igre[i]=new Igra(igr1,igr2);
-				uvediIgraceUIgru(igr1,igr2);
+				uvediIgraceUIgru(igre[i],igr1,igr2);
 				posaljiListuSlobodnihIgraca();
 				igre[i].pocni();
 				break;
@@ -64,8 +64,10 @@ public class MainServer {
 			}
 		}
 	}
-	private static void uvediIgraceUIgru(Igrac igr1,Igrac igr2){
+	private static void uvediIgraceUIgru(Igra igra,Igrac igr1,Igrac igr2){
 		//igr2.izlazniTok.println(Igrac.PRIHVACENA_IGRA);
+		igr1.igra=igra;
+		igr2.igra=igra;
 		igr1.igraj();
 		igr2.igraj();
 		igraci.remove(igr1);

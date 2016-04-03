@@ -14,8 +14,8 @@ public class Igrac implements Runnable{
 	public final static String POZIVAC="1";
 	public final static String PRIHVACENA_IGRA="D";
 	boolean naPotezu;
-	
-	
+	boolean hocePonovo;
+	Igra igra;
 	public Igrac(Socket soket) {
 		
 		try {
@@ -32,6 +32,7 @@ public class Igrac implements Runnable{
 			}
 			MainServer.posaljiListuSlobodnihIgraca();
 			poslaoPoziv=false;
+			hocePonovo=false;
 			t = new Thread(this);
 			t.setDaemon(true);
 			t.start();
@@ -58,6 +59,9 @@ public class Igrac implements Runnable{
 					MainServer.igraci.remove(this);
 					break;
 				}
+				if(hocePonovoDaIgra(podaci)){
+					pokusajPonovnuIgru();
+				}
 				String protivnik=podaci[0];
 				String tipIgraca=podaci[1];
 				String prihvacenaIgra=podaci[2];
@@ -81,6 +85,7 @@ public class Igrac implements Runnable{
 		return ime;
 	}
 	void zavrsiIgru(){
+		igra=null;
 		notify();
 		poslaoPoziv=false;
 	}
@@ -105,7 +110,9 @@ public class Igrac implements Runnable{
 	boolean hoceDaPovucePoziv(String[] niz){
 		return niz[0].equals("POVUCI POZIV");
 	}
-
+	boolean hocePonovoDaIgra(String[] niz){
+		return niz[0].equals("DA");
+	}
 	void zatvoriVeze(){
 		try {
 			ulazniTok.close();
@@ -116,5 +123,13 @@ public class Igrac implements Runnable{
 			e.printStackTrace();
 		}
 		
+	}
+	void cekajOdgovor(){
+		notify();
+	}
+	void pokusajPonovnuIgru(){
+		hocePonovo=true;
+		igra.notify();
+		igraj();
 	}
 }

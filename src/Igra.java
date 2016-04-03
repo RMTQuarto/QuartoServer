@@ -1,5 +1,8 @@
 import java.io.IOException;
 import java.util.Random;
+import java.util.TimerTask;
+
+import javax.management.timer.Timer;
 
 public class Igra implements Runnable{
 	Igrac igrac1;
@@ -48,19 +51,20 @@ public class Igra implements Runnable{
 				if(tabla.partijaJeZavrsena() == 2) {
 					posaljiObojiciPoruku("Nereseno");
 				}
-				posaljiObojiciPoruku("Nova igra?");
-				//trebaju mi dve niti ovde, treba probuditi igrace
+				posaljiObojiciPoruku("Nova igra?");		
+				igrac1.cekajOdgovor();
+				igrac2.cekajOdgovor();
 				try {
-					String odg1=igrac1.ulazniTok.readLine();
-					String odg2=igrac2.ulazniTok.readLine();
-					if(odg1.equals(odg2) && odg1.equals("DA")){
-						MainServer.napraviPonovnuIgru(this);
-						return;
-					}
-				} catch (IOException e) {
+					wait(2500);
+					wait(2500);
+				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+					if(igrac1.hocePonovo && igrac2.hocePonovo){
+						MainServer.napraviPonovnuIgru(this);
+						return;
+					}
 				zavrsiIgru();
 				return;
 			}
