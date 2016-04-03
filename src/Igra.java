@@ -40,34 +40,19 @@ public class Igra implements Runnable{
 				omoguciProtivnikuDaIgra(igrac2, igrac1);
 			}
 		while(true){
-			// ova dva uslova treba da budu jedna metoda
-			if(tabla.proveraPobede()){
-				String pobednik=(igrac1.naPotezu)?igrac2+" je pobedio":igrac1+" je pobedio";
-				posaljiObojiciPoruku(pobednik);
-				posaljiObojiciPoruku("Nova igra?");
-				//trebaju mi dve niti ovde, treba probuditi igrace
-				try {
-					String odg1=igrac1.ulazniTok.readLine();
-					String odg2=igrac2.ulazniTok.readLine();
-					if(odg1.equals(odg2) && odg1.equals("DA")){
-						MainServer.napraviPonovnuIgru(this);
-						return;
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if(tabla.partijaJeZavrsena() != 0){
+				if(tabla.partijaJeZavrsena() == 1) {
+					String pobednik=(igrac1.naPotezu)?igrac2+" je pobedio":igrac1+" je pobedio";
+					posaljiObojiciPoruku(pobednik);
 				}
-				zavrsiIgru();
-				return;
-			}
-			if(tabla.redniBrojPoteza()==16){
-				posaljiObojiciPoruku("Nereseno");
+				if(tabla.partijaJeZavrsena() == 2) {
+					posaljiObojiciPoruku("Nereseno");
+				}
 				posaljiObojiciPoruku("Nova igra?");
 				//trebaju mi dve niti ovde, treba probuditi igrace
 				try {
 					String odg1=igrac1.ulazniTok.readLine();
 					String odg2=igrac2.ulazniTok.readLine();
-					// treba i tajmer da se uradi, ako neko ne odgovori dugo da se smatra da nece da nastave
 					if(odg1.equals(odg2) && odg1.equals("DA")){
 						MainServer.napraviPonovnuIgru(this);
 						return;
@@ -82,7 +67,6 @@ public class Igra implements Runnable{
 			if(igrac1.naPotezu){ 
 				staviFiguruNaTablu(igrac1);
 				omoguciProtivnikuDaIgra(igrac1, igrac2);
-				
 			}
 			else{
 				staviFiguruNaTablu(igrac2);
@@ -104,10 +88,9 @@ public class Igra implements Runnable{
 		posaljiObojiciPoruku(tabla);
 		posaljiObojiciPoruku(figure);
 	}
-	// promeni ime ceka, ruzno je
-	void podesiRedosled(boolean ceka){
-		igrac1.naPotezu=ceka;
-		igrac2.naPotezu=!ceka;
+	void podesiRedosled(boolean naPotezu){
+		igrac1.naPotezu=naPotezu;
+		igrac2.naPotezu=!naPotezu;
 		
 	}
 	void staviFiguruNaTablu(Igrac naPotezu){

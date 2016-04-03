@@ -25,41 +25,43 @@ public class Tabla {
 		return redniBrojPoteza;
 	}
 	
-	//vraca true ako je partija zavrsena, false ako nije
-	public boolean proveraPobede() {
-		if(redniBrojPoteza() >= 4) {
-			if(redniBrojPoteza() <= 16)
-			return proveraCetiriFigure();
+	//vraca 0 ako nije zavrsena, 1 ako je zavrsena pobedom, 2 ako je nereseno
+	public int partijaJeZavrsena() {
+		if(redniBrojPoteza() >= 4){
+			if(redniBrojPoteza() <= 16 && proveraCetiriFigure() == 1)
+				return 1;
+			if(redniBrojPoteza() == 16 && proveraCetiriFigure() == 0)
+				return 2;
 		}
-		return false;
+		return 0;
 	}
 	
-	public boolean proveraCetiriFigure() {
+	public int proveraCetiriFigure() {
 		//glavna dijagonala
 		if(tabla[0][0]!=null && tabla[1][1]!=null && tabla[2][2]!=null && tabla[3][3]!=null)
-			if(tabla[0][0].equals(tabla[1][1]) && tabla[0][0].equals(tabla[2][2]) && tabla[0][0].equals(tabla[3][3]) 
-					&& tabla[1][1].equals(tabla[2][2]) && tabla[1][1].equals(tabla[3][3]) && tabla[2][2].equals(tabla[3][3])) 
-				return true;
+			if(tabla[0][0].isteFigure(tabla[1][1]) && tabla[0][0].isteFigure(tabla[2][2]) && tabla[0][0].isteFigure(tabla[3][3]) 
+					&& tabla[1][1].isteFigure(tabla[2][2]) && tabla[1][1].isteFigure(tabla[3][3]) && tabla[2][2].isteFigure(tabla[3][3])) 
+				return 1;
 		//sporedna dijagonala
 		if(tabla[0][3]!=null && tabla[1][2]!=null && tabla[2][1]!=null && tabla[3][0]!=null)
-			if(tabla[0][3].equals(tabla[1][2]) && tabla[0][3].equals(tabla[2][1]) && tabla[0][3].equals(tabla[3][0]) 
-					&& tabla[1][2].equals(tabla[2][1]) && tabla[1][2].equals(tabla[3][0]) && tabla[2][1].equals(tabla[3][0])) 
-				return true;
+			if(tabla[0][3].isteFigure(tabla[1][2]) && tabla[0][3].isteFigure(tabla[2][1]) && tabla[0][3].isteFigure(tabla[3][0]) 
+					&& tabla[1][2].isteFigure(tabla[2][1]) && tabla[1][2].isteFigure(tabla[3][0]) && tabla[2][1].isteFigure(tabla[3][0])) 
+				return 1;
 		//redovi
 		for (int i = 0; i < brojPoljaNaJednojOsi; i++) {
 			if(tabla[i][0]!=null && tabla[i][1]!=null && tabla[i][2]!=null && tabla[i][3]!=null)
-				if(tabla[i][0].equals(tabla[i][1]) && tabla[i][0].equals(tabla[i][2]) && tabla[i][0].equals(tabla[i][3]) 
-						&& tabla[i][1].equals(tabla[i][2]) && tabla[i][1].equals(tabla[i][3]) && tabla[i][2].equals(tabla[i][3]))
-					return true;
+				if(tabla[i][0].isteFigure(tabla[i][1]) && tabla[i][0].isteFigure(tabla[i][2]) && tabla[i][0].isteFigure(tabla[i][3]) 
+						&& tabla[i][1].isteFigure(tabla[i][2]) && tabla[i][1].isteFigure(tabla[i][3]) && tabla[i][2].isteFigure(tabla[i][3]))
+					return 1;
 		}
 		//kolone
 		for (int j = 0; j < brojPoljaNaJednojOsi; j++) {
 			if(tabla[0][j]!=null && tabla[1][j]!=null && tabla[2][j]!=null && tabla[3][j]!=null)
-				if(tabla[0][j].equals(tabla[1][j]) && tabla[0][j].equals(tabla[2][j]) && tabla[0][j].equals(tabla[3][j]) 
-						&& tabla[1][j].equals(tabla[2][j]) && tabla[1][j].equals(tabla[3][j]) && tabla[2][j].equals(tabla[3][j]))
-					return true;
+				if(tabla[0][j].isteFigure(tabla[1][j]) && tabla[0][j].isteFigure(tabla[2][j]) && tabla[0][j].isteFigure(tabla[3][j]) 
+						&& tabla[1][j].isteFigure(tabla[2][j]) && tabla[1][j].isteFigure(tabla[3][j]) && tabla[2][j].isteFigure(tabla[3][j]))
+					return 1;
 		}
-		return false;
+		return 0;
 	}
 	@Override
 	public String toString() {

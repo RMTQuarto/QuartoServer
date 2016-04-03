@@ -28,6 +28,14 @@ public class Figura {
 		return visina;
 	}
 
+	public boolean isteFigure(Figura figura) {
+		if(getBoja() == figura.boja || getOblik() == figura.oblik 
+				|| getSupljina() == figura.supljina || getVisina() == figura.visina)
+			return true;
+		return false;
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -35,12 +43,18 @@ public class Figura {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Figura figura = (Figura) obj;
-		if(boja == figura.boja || oblik == figura.oblik 
-				|| supljina == figura.supljina || visina == figura.visina)
-			return true;
-		return false;
+		Figura other = (Figura) obj;
+		if (boja != other.boja)
+			return false;
+		if (oblik != other.oblik)
+			return false;
+		if (supljina != other.supljina)
+			return false;
+		if (visina != other.visina)
+			return false;
+		return true;
 	}
+
 	@Override
 	public String toString() {
 		return boja+oblik+supljina+visina+"";

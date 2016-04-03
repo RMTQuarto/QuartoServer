@@ -60,8 +60,7 @@ public class Figure {
 	
 	public void izbaciFiguru(Figura figura) {
 		for (int i = 0; i < figure.length; i++) {
-			if(figura.getBoja() == figure[i].getBoja() && figura.getOblik() == figure[i].getOblik() &&
-					figura.getSupljina() == figure[i].getSupljina() && figura.getVisina() == figure[i].getVisina()) {
+			if(figure[i].equals(figura)) {
 				figure[i] = null;
 				break;
 			}
