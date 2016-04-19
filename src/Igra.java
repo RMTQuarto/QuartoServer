@@ -14,6 +14,7 @@ public class Igra implements Runnable {
 	public static final String NERESENO="NERESENO";
 	public static final String POBEDA="JE POBEDIO";
 	public static final String NOVA_IGRA="NOVA IGRA?";
+	public static final String IGRAS="IGRAS";
 
 	public Igra(Igrac igrac1, Igrac igrac2) {
 		inicijalizuj(igrac1, igrac2);
@@ -46,8 +47,10 @@ public class Igra implements Runnable {
 
 	public synchronized void run() {
 		if (igrac1.naPotezu) {
+			igrac1.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
 			omoguciProtivnikuDaIgra(igrac1, igrac2);
 		} else {
+			igrac2.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
 			omoguciProtivnikuDaIgra(igrac2, igrac1);
 		}
 		while (true) {
@@ -77,9 +80,11 @@ public class Igra implements Runnable {
 				return;
 			}
 			if (igrac1.naPotezu) {
+				igrac1.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
 				staviFiguruNaTablu(igrac1,igrac2);
 				omoguciProtivnikuDaIgra(igrac1, igrac2);
 			} else {
+				igrac2.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
 				staviFiguruNaTablu(igrac2,igrac2);
 				omoguciProtivnikuDaIgra(igrac2, igrac1);
 			}
