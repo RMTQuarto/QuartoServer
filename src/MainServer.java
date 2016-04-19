@@ -7,7 +7,11 @@ public class MainServer {
 	public static Igra[] igre = new Igra[5];
 	public static LinkedList<Igrac> igraci=new LinkedList<Igrac>();
 	public static final int BROJ_PORTA=9999;
-	
+	public static final String PORUKE_KONEKTOVANJA="K;";
+	public static final String PORUKE_IGRE="I;";
+	public static final String PORUKE_POZIVANJA_NA_IGRU="P;";
+	public static final String PUN_SERVER="SERVER PUN";
+	public static final String LISTA="L;";
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -30,14 +34,14 @@ public class MainServer {
 		
 	}
 	private static String listaSlobodnihIgraca(){
-		String lista="";
+		String lista=LISTA;
 		for(Igrac igrac : igraci) {
 			lista+=igrac+";";
 		}
 		return lista;
 	}
 	public static void posaljiPozivnicu(String pozivac, String protivnik){
-		nadjiIgraca(protivnik).izlazniTok.println(pozivac);
+		nadjiIgraca(protivnik).izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+pozivac);
 	}
 	
 	public static void napraviIgru(String igrac1, String igrac2){
@@ -48,12 +52,11 @@ public class MainServer {
 				igre[i]=new Igra(igr1,igr2);
 				uvediIgraceUIgru(igre[i],igr1,igr2);
 				posaljiListuSlobodnihIgraca();
-				igre[i].pocni();
 				break;
 			}
 			if(i==igre.length-1){
-				igr1.izlazniTok.println("SERVER JE PUN, MOLIMO SACEKAJTE");
-				igr2.izlazniTok.println("SERVER JE PUN, MOLIMO SACEKAJTE");
+				igr1.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+PUN_SERVER);
+				igr2.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+PUN_SERVER);
 			}
 		}
 	}
@@ -65,7 +68,7 @@ public class MainServer {
 		}
 	}
 	private static void uvediIgraceUIgru(Igra igra,Igrac igr1,Igrac igr2){
-		//igr2.izlazniTok.println(Igrac.PRIHVACENA_IGRA);
+		igr2.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+Igrac.PRIHVACENA_IGRA);
 		igr1.igra=igra;
 		igr2.igra=igra;
 		igr1.igraj();

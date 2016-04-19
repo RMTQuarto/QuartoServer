@@ -4,70 +4,75 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 
-public class Igrac implements Runnable{
+public class Igrac implements Runnable {
 	Socket soket;
 	BufferedReader ulazniTok;
 	PrintStream izlazniTok;
 	String ime;
 	Thread t;
 	boolean poslaoPoziv;
-	public final static String POZIVAC="1";
-	public final static String PRIHVACENA_IGRA="D";
+	public final static String POZIVAC = "1";
+	public final static String PRIHVACENA_IGRA = "D";
+	public final static String ZAUZETO_IME="IME ZAUZETO";
+	public static final String DISKONEKTOVANJE="KRAJ";
+	public static final String POVUCI_POZIV="POVUCI POZIV";
+	public static final String IGRAJ_PONOVO="IGRAJ PONOVO";
 	boolean naPotezu;
 	boolean hocePonovo;
 	Igra igra;
+
 	public Igrac(Socket soket) {
-		
+
 		try {
 			this.soket = soket;
 			ulazniTok = new BufferedReader(new InputStreamReader(soket.getInputStream()));
 			izlazniTok = new PrintStream(soket.getOutputStream());
 			ime = ulazniTok.readLine();
-			if(MainServer.igraci.contains(this)) {
-				izlazniTok.println("POSTOJI IGRAC SA ISTIM IMENOM, MORATE UNETI DRUGO IME");
-				zatvoriVeze();
+			if (MainServer.igraci.contains(this)) {
+				izlazniTok.println(MainServer.PORUKE_KONEKTOVANJA+ZAUZETO_IME);
 				return;
-			}else{
+			} else {
 				MainServer.igraci.add(this);
 			}
 			MainServer.posaljiListuSlobodnihIgraca();
-			poslaoPoziv=false;
-			hocePonovo=false;
-			t = new Thread(this);
-			t.setDaemon(true);
-			t.start();
+			poslaoPoziv = false;
+			hocePonovo = false;
+			pocni();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
-	
-
+	void pocni(){
+		t = new Thread(this);
+		t.setDaemon(true);
+		t.start();
+	}
 	public void run() {
 		try {
 			while (true) {
 				String[] podaci = ulazniTok.readLine().split(";");
-				if(poslaoPoziv){
-					if(hoceDaPovucePoziv(podaci)){
-						poslaoPoziv=false;
+				if (poslaoPoziv) {
+					if (hoceDaPovucePoziv(podaci)) {
+						poslaoPoziv = false;
 					}
 					continue;
 				}
-				if(hoceDaSeDiskonektuje(podaci)){
+				if (hoceDaSeDiskonektuje(podaci)) {
 					zatvoriVeze();
 					MainServer.igraci.remove(this);
 					break;
 				}
-				if(hocePonovoDaIgra(podaci)){
+				if (hocePonovoDaIgra(podaci)) {
 					pokusajPonovnuIgru();
 				}
-				String protivnik=podaci[0];
-				String tipIgraca=podaci[1];
-				String prihvacenaIgra=podaci[2];
+				String protivnik = podaci[0];
+				String tipIgraca = podaci[1];
+				String prihvacenaIgra = podaci[2];
 				if (tipIgraca.equals(Igrac.POZIVAC)) {
 					MainServer.posaljiPozivnicu(ime, protivnik);
-					poslaoPoziv=true;
+					poslaoPoziv = true;
 				} else {
 					if (prihvacenaIgra.equals(Igrac.PRIHVACENA_IGRA)) {
 						MainServer.napraviIgru(ime, protivnik);
@@ -75,8 +80,7 @@ public class Igrac implements Runnable{
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MainServer.igraci.remove(this);		
 		}
 	}
 
@@ -84,13 +88,14 @@ public class Igrac implements Runnable{
 	public String toString() {
 		return ime;
 	}
-	void zavrsiIgru(){
-		igra=null;
+
+	void zavrsiIgru() {
+		igra = null;
 		notify();
-		poslaoPoziv=false;
+		poslaoPoziv = false;
 	}
-	
-	void igraj() {
+
+	synchronized void igraj() {
 		try {
 			wait();
 		} catch (InterruptedException e) {
@@ -98,22 +103,28 @@ public class Igrac implements Runnable{
 			e.printStackTrace();
 		}
 	}
-	boolean hoceDaSeDiskonektuje(String[] niz){
-		return niz[0].equals("KRAJ");
+
+	boolean hoceDaSeDiskonektuje(String[] niz) {
+		return niz[0].equals(DISKONEKTOVANJE);
 	}
+
 	@Override
 	public boolean equals(Object o) {
-		if(!(o instanceof Igrac))return false;
-		Igrac i=(Igrac) o;
+		if (!(o instanceof Igrac))
+			return false;
+		Igrac i = (Igrac) o;
 		return ime.equals(i.ime);
 	}
-	boolean hoceDaPovucePoziv(String[] niz){
-		return niz[0].equals("POVUCI POZIV");
+
+	boolean hoceDaPovucePoziv(String[] niz) {
+		return niz[0].equals(POVUCI_POZIV);
 	}
-	boolean hocePonovoDaIgra(String[] niz){
-		return niz[0].equals("DA");
+
+	boolean hocePonovoDaIgra(String[] niz) {
+		return niz[0].equals(IGRAJ_PONOVO);
 	}
-	void zatvoriVeze(){
+
+	void zatvoriVeze() {
 		try {
 			ulazniTok.close();
 			izlazniTok.close();
@@ -122,13 +133,15 @@ public class Igrac implements Runnable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	void cekajOdgovor(){
+
+	void cekajOdgovor() {
 		notify();
 	}
-	void pokusajPonovnuIgru(){
-		hocePonovo=true;
+
+	void pokusajPonovnuIgru() {
+		hocePonovo = true;
 		igra.notify();
 		igraj();
 	}
