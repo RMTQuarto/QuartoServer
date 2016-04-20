@@ -52,7 +52,9 @@ public class Igrac implements Runnable {
 	public void run() {
 		try {
 			while (true) {
-				String[] podaci = ulazniTok.readLine().split(";");
+				String podaciS=ulazniTok.readLine();
+				if(podaciS==null)continue;
+				String[] podaci = podaciS.split(";");
 				if (poslaoPoziv) {
 					if (hoceDaPovucePoziv(podaci)) {
 						poslaoPoziv = false;

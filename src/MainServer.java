@@ -49,6 +49,7 @@ public class MainServer {
 		Igrac igr2=nadjiIgraca(igrac2);
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]==null){
+				igr2.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+Igrac.PRIHVACENA_IGRA);
 				igre[i]=new Igra(igr1,igr2);
 				uvediIgraceUIgru(igre[i],igr1,igr2);
 				posaljiListuSlobodnihIgraca();
@@ -68,7 +69,6 @@ public class MainServer {
 		}
 	}
 	private static void uvediIgraceUIgru(Igra igra,Igrac igr1,Igrac igr2){
-		igr2.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+Igrac.PRIHVACENA_IGRA);
 		igr1.igra=igra;
 		igr2.igra=igra;
 		igr1.igraj();

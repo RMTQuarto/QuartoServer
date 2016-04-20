@@ -32,6 +32,7 @@ public class Igra implements Runnable {
 	}
 
 	void inicijalizuj(Igrac igrac1, Igrac igrac2) {
+		
 		this.igrac1 = igrac1;
 		this.igrac2 = igrac2;
 		tabla = new Tabla();
@@ -85,7 +86,7 @@ public class Igra implements Runnable {
 				omoguciProtivnikuDaIgra(igrac1, igrac2);
 			} else {
 				igrac2.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
-				staviFiguruNaTablu(igrac2,igrac2);
+				staviFiguruNaTablu(igrac2,igrac1);
 				omoguciProtivnikuDaIgra(igrac2, igrac1);
 			}
 		}
