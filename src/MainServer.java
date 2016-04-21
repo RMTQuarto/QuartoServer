@@ -49,10 +49,11 @@ public class MainServer {
 		Igrac igr2=nadjiIgraca(igrac2);
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]==null){
-				igr2.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+Igrac.PRIHVACENA_IGRA);
+				
 				igre[i]=new Igra(igr1,igr2);
 				uvediIgraceUIgru(igre[i],igr1,igr2);
 				posaljiListuSlobodnihIgraca();
+				igre[i].pocni();
 				break;
 			}
 			if(i==igre.length-1){
@@ -68,13 +69,13 @@ public class MainServer {
 			}
 		}
 	}
-	private static void uvediIgraceUIgru(Igra igra,Igrac igr1,Igrac igr2){
-		igr1.igra=igra;
-		igr2.igra=igra;
+	private static void uvediIgraceUIgru(Igra igra,Igrac igr1,Igrac igr2){		
 		igr1.igraj();
 		igr2.igraj();
+		igr1.igra=igra;	
+		igr2.igra=igra;
 		igraci.remove(igr1);
-		igraci.remove(igr2);
+		igraci.remove(igr2);	
 	}
 	public static Igrac nadjiIgraca(String ime){
 		for (Igrac igrac : igraci) {
@@ -92,5 +93,9 @@ public class MainServer {
 				igre[i]=null;
 			}
 		}
+	}
+	public static void izbaciIgraca(Igrac igrac){
+		igraci.remove(igrac);
+		posaljiListuSlobodnihIgraca();
 	}
 }

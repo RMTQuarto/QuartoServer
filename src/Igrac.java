@@ -13,13 +13,14 @@ public class Igrac implements Runnable {
 	boolean poslaoPoziv;
 	public final static String POZIVAC = "1";
 	public final static String PRIHVACENA_IGRA = "D";
-	public final static String ZAUZETO_IME="IME ZAUZETO";
-	public static final String DISKONEKTOVANJE="KRAJ";
-	public static final String POVUCI_POZIV="POVUCI POZIV";
-	public static final String IGRAJ_PONOVO="IGRAJ PONOVO";
+	public final static String ZAUZETO_IME = "IME ZAUZETO";
+	public static final String DISKONEKTOVANJE = "KRAJ";
+	public static final String POVUCI_POZIV = "POVUCI POZIV";
+	public static final String IGRAJ_PONOVO = "IGRAJ PONOVO";
 	boolean naPotezu;
 	boolean hocePonovo;
 	Igra igra;
+	volatile boolean aktivnaNit;
 
 	public Igrac(Socket soket) {
 
@@ -29,7 +30,7 @@ public class Igrac implements Runnable {
 			izlazniTok = new PrintStream(soket.getOutputStream());
 			ime = ulazniTok.readLine();
 			if (MainServer.igraci.contains(this)) {
-				izlazniTok.println(MainServer.PORUKE_KONEKTOVANJA+ZAUZETO_IME);
+				izlazniTok.println(MainServer.PORUKE_KONEKTOVANJA + ZAUZETO_IME);
 				return;
 			} else {
 				MainServer.igraci.add(this);
@@ -37,6 +38,7 @@ public class Igrac implements Runnable {
 			MainServer.posaljiListuSlobodnihIgraca();
 			poslaoPoziv = false;
 			hocePonovo = false;
+			aktivnaNit = true;
 			pocni();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -44,46 +46,57 @@ public class Igrac implements Runnable {
 		}
 
 	}
-	void pocni(){
-		t = new Thread(this);
+
+	void pocni() {
+		t = new Thread(this, ime);
 		t.setDaemon(true);
 		t.start();
 	}
+
 	public void run() {
+
 		try {
 			while (true) {
-				String podaciS=ulazniTok.readLine();
-				if(podaciS==null)continue;
-				String[] podaci = podaciS.split(";");
-				if (poslaoPoziv) {
-					if (hoceDaPovucePoziv(podaci)) {
-						poslaoPoziv = false;
+				if (aktivnaNit) {
+					String podaciS = ulazniTok.readLine();
+					if(podaciS==null) {
+						MainServer.izbaciIgraca(this);
+						return;
 					}
-					continue;
-				}
-				if (hoceDaSeDiskonektuje(podaci)) {
-					zatvoriVeze();
-					MainServer.igraci.remove(this);
-					break;
-				}
-				if (hocePonovoDaIgra(podaci)) {
-					pokusajPonovnuIgru();
-				}
-				String protivnik = podaci[0];
-				String tipIgraca = podaci[1];
-				String prihvacenaIgra = podaci[2];
-				if (tipIgraca.equals(Igrac.POZIVAC)) {
-					MainServer.posaljiPozivnicu(ime, protivnik);
-					poslaoPoziv = true;
-				} else {
-					if (prihvacenaIgra.equals(Igrac.PRIHVACENA_IGRA)) {
-						MainServer.napraviIgru(ime, protivnik);
+					if (podaciS.equals("OK"))
+						continue;
+					String[] podaci = podaciS.split(";");
+					if (poslaoPoziv) {
+						if (hoceDaPovucePoziv(podaci)) {
+							poslaoPoziv = false;
+						}
+						continue;
+					}
+					if (hoceDaSeDiskonektuje(podaci)) {
+						zatvoriVeze();
+						MainServer.izbaciIgraca(this);
+						return;
+					}
+					if (hocePonovoDaIgra(podaci)) {
+						pokusajPonovnuIgru();
+					}
+					String protivnik = podaci[0];
+					String tipIgraca = podaci[1];
+					String prihvacenaIgra = podaci[2];
+					if (tipIgraca.equals(Igrac.POZIVAC)) {
+						MainServer.posaljiPozivnicu(ime, protivnik);
+						poslaoPoziv = true;
+					} else {
+						if (prihvacenaIgra.equals(Igrac.PRIHVACENA_IGRA)) {
+							MainServer.napraviIgru(protivnik, ime);
+						}
 					}
 				}
 			}
 		} catch (IOException e) {
-			MainServer.igraci.remove(this);		
+			MainServer.izbaciIgraca(this);
 		}
+
 	}
 
 	@Override
@@ -97,13 +110,14 @@ public class Igrac implements Runnable {
 		poslaoPoziv = false;
 	}
 
-	synchronized void igraj() {
-		try {
-			wait();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	void igraj() {
+		this.aktivnaNit = false;
+		// try {
+		// wait();
+		// } catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 	}
 
 	boolean hoceDaSeDiskonektuje(String[] niz) {
@@ -139,7 +153,8 @@ public class Igrac implements Runnable {
 	}
 
 	void cekajOdgovor() {
-		notify();
+		aktivnaNit = true;
+		// notify();
 	}
 
 	void pokusajPonovnuIgru() {
