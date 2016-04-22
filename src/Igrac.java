@@ -106,7 +106,8 @@ public class Igrac implements Runnable {
 
 	void zavrsiIgru() {
 		igra = null;
-		notify();
+		aktivnaNit=true;
+	//	notify();
 		poslaoPoziv = false;
 	}
 
