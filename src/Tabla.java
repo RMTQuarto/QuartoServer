@@ -7,7 +7,9 @@ public class Tabla {
 		tabla = new Figura[brojPoljaNaJednojOsi][brojPoljaNaJednojOsi];
 	}
 	
-	public void postaviFiguruNaPolje(char boja, char oblik, char supljina, char visina, int x, int y) {
+	public void postaviFiguruNaPolje(char boja, char oblik, char supljina, char visina, char xC, char yC) {
+		int x=xC-48;
+		int y=yC-48;
 		if(tabla[x][y] != null) return;
 		Figura figura = new Figura(boja, oblik, supljina, visina);
 		tabla[x][y] = figura;

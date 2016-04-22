@@ -20,9 +20,7 @@ public class Igra implements Runnable {
 	public Igra(Igrac igrac1, Igrac igrac2) {
 		inicijalizuj(igrac1, igrac2);
 		Random r = new Random();
-		float f=r.nextFloat();
-		System.out.println(f);
-		igrac1PocinjeIgru = (f < 0.5) ? true : false;
+		igrac1PocinjeIgru = (r.nextFloat() < 0.5) ? true : false;
 		podesiRedosled(igrac1PocinjeIgru);
 		igrac1.izlazniTok.println(MainServer.PORUKE_POZIVANJA_NA_IGRU+Igrac.PRIHVACENA_IGRA);
 	}
@@ -53,6 +51,9 @@ public class Igra implements Runnable {
 	}
 
 	public synchronized void run() {
+		if(igrac1PocinjeIgru){
+			System.out.println(igrac1);
+		}else System.out.println(igrac2);
 		try {
 			wait(1000);
 		} catch (InterruptedException e1) {
@@ -111,7 +112,7 @@ public class Igra implements Runnable {
 
 	void omoguciProtivnikuDaIgra(Igrac naPotezu, Igrac ceka) {
 		izaberiFiguruZaProtivnika(naPotezu, ceka);
-		podesiRedosled(ceka.naPotezu);
+		podesiRedosled();
 	//	posaljiStanje();
 	}
 
@@ -128,7 +129,10 @@ public class Igra implements Runnable {
 	void podesiRedosled(boolean naPotezu) {
 		igrac1.naPotezu = naPotezu;
 		igrac2.naPotezu = !naPotezu;
-
+	}
+	void podesiRedosled() {
+		igrac1.naPotezu = !igrac1.naPotezu;
+		igrac2.naPotezu = !igrac2.naPotezu;
 	}
 
 	void staviFiguruNaTablu(Igrac naPotezu,Igrac ceka) {
@@ -138,13 +142,13 @@ public class Igra implements Runnable {
 				MainServer.izbaciIgraca(naPotezu);
 				return;
 				//posalji poruku da se prekine igra
-			}
-			ceka.izlazniTok.println(MainServer.PORUKE_IGRE+potezS);
+			}			
 			String[] potez = potezS.split(";");
 			String figura = potez[0];
 			String pozicija = potez[1];
 			tabla.postaviFiguruNaPolje(figura.charAt(0), figura.charAt(1), figura.charAt(2), figura.charAt(3),
 					pozicija.charAt(0), pozicija.charAt(1));
+			ceka.izlazniTok.println(MainServer.PORUKE_IGRE+potezS);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -155,6 +159,11 @@ public class Igra implements Runnable {
 	void izaberiFiguruZaProtivnika(Igrac naPotezu, Igrac ceka) {
 		try {
 			String 	figura = naPotezu.ulazniTok.readLine();
+			if(figura==null){
+				MainServer.izbaciIgraca(naPotezu);
+				return;
+				//posalji poruku da se prekine igra
+			}
 			figure.izbaciFiguru(figure.nadjiFiguru(figura));
 			ceka.izlazniTok.println(MainServer.PORUKE_IGRE+figura);
 		} catch (IOException e) {
