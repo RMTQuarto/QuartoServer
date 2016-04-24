@@ -99,7 +99,7 @@ public class Igra implements Runnable {
 		if (tabla.partijaJeZavrsena() != 0) {
 			if (tabla.partijaJeZavrsena() == 1) {
 				String pobednik = (naPotezu.naPotezu) ?naPotezu.toString():ceka.toString();
-				System.out.println("saljem pobedu");
+				
 				posaljiObojiciPoruku(pobednik+POBEDA);
 			}
 			if (tabla.partijaJeZavrsena() == 2) {
@@ -108,15 +108,13 @@ public class Igra implements Runnable {
 			// ne znam sto cekam ovde iz nekog slucaja nece da radi lepo ako se ne ceka
 				wait(1000);
 			
-			posaljiObojiciPoruku(NOVA_IGRA);
+			posaljiObojiciPoruku(NOVA_IGRA);			
 			igrac1.cekajOdgovor();
 			igrac2.cekajOdgovor();
 			
-			
-				wait(2500);
-				wait(2500);
-			
-			
+			   wait(2500);
+			   wait(2500);
+			   
 			if (igrac1.hocePonovo && igrac2.hocePonovo) {
 				MainServer.napraviPonovnuIgru(this);
 				throw new KrajIgreException("napravili novu igru");
@@ -133,9 +131,7 @@ public class Igra implements Runnable {
 
 	public void posaljiObojiciPoruku(Object o) {
 		igrac1.izlazniTok.println(MainServer.PORUKE_IGRE+o);
-		System.out.println("Poslao prvom");
 		igrac2.izlazniTok.println(MainServer.PORUKE_IGRE+o);
-		System.out.println("Poslao drugom");
 	}
 
 	void podesiRedosled(boolean naPotezu) {

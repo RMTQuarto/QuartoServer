@@ -17,10 +17,11 @@ public class Igrac implements Runnable {
 	public static final String DISKONEKTOVANJE = "KRAJ";
 	public static final String POVUCI_POZIV = "POVUCI POZIV";
 	public static final String IGRAJ_PONOVO = "IGRAJ PONOVO";
+	public static final String POZIVNICA_USPESNA="OK";
 	boolean naPotezu;
-	boolean hocePonovo;
 	Igra igra;
 	volatile boolean aktivnaNit;
+	volatile boolean hocePonovo;
 
 	public Igrac(Socket soket) {
 
@@ -37,7 +38,7 @@ public class Igrac implements Runnable {
 			}
 			MainServer.posaljiListuSlobodnihIgraca();
 			poslaoPoziv = false;
-			hocePonovo = false;
+			hocePonovo=false;
 			aktivnaNit = true;
 			pocni();
 		} catch (IOException e) {
@@ -59,27 +60,28 @@ public class Igrac implements Runnable {
 			while (true) {
 				if (aktivnaNit) {
 					String podaciS = ulazniTok.readLine();
-					if(podaciS==null) {
+					if(podaciS==null){
 						MainServer.izbaciIgraca(this);
 						return;
 					}
-					if (podaciS.equals("OK"))
+					if (podaciS.equals(POZIVNICA_USPESNA))
 						continue;
-					String[] podaci = podaciS.split(";");
-					if (poslaoPoziv) {
-						if (hoceDaPovucePoziv(podaci)) {
-							poslaoPoziv = false;
-						}
+					if(hocePonovoDaIgra(podaciS)){
+						igrajPonovo();
 						continue;
 					}
-					if (hoceDaSeDiskonektuje(podaci)) {
+					if (hoceDaSeDiskonektuje(podaciS)) {
 						zatvoriVeze();
 						MainServer.izbaciIgraca(this);
 						return;
 					}
-					if (hocePonovoDaIgra(podaci)) {
-						pokusajPonovnuIgru();
-					}
+					if (poslaoPoziv) {
+						if (hoceDaPovucePoziv(podaciS)) {
+							poslaoPoziv = false;
+						}
+						continue;
+					}	
+					String[] podaci = podaciS.split(";");					
 					String protivnik = podaci[0];
 					String tipIgraca = podaci[1];
 					String prihvacenaIgra = podaci[2];
@@ -96,51 +98,29 @@ public class Igrac implements Runnable {
 		} catch (IOException e) {
 			MainServer.izbaciIgraca(this);
 		}
-
 	}
-
-	@Override
-	public String toString() {
-		return ime;
-	}
-
 	void zavrsiIgru() {
 		igra = null;
-		aktivnaNit=true;
-	//	notify();
 		poslaoPoziv = false;
+		aktivnaNit=true;	
 	}
 
 	void igraj() {
-		this.aktivnaNit = false;
-		// try {
-		// wait();
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		aktivnaNit = false;
 	}
 
-	boolean hoceDaSeDiskonektuje(String[] niz) {
-		return niz[0].equals(DISKONEKTOVANJE);
+	boolean hoceDaSeDiskonektuje(String komanda) {
+		return komanda.equals(DISKONEKTOVANJE);
 	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Igrac))
-			return false;
-		Igrac i = (Igrac) o;
-		return ime.equals(i.ime);
+	boolean hocePonovoDaIgra(String odgovor) {
+		return odgovor.equals(IGRAJ_PONOVO);
 	}
-
-	boolean hoceDaPovucePoziv(String[] niz) {
-		return niz[0].equals(POVUCI_POZIV);
+	void cekajOdgovor(){
+		aktivnaNit=true;
 	}
-
-	boolean hocePonovoDaIgra(String[] niz) {
-		return niz[0].equals(IGRAJ_PONOVO);
+	void igrajPonovo(){
+		hocePonovo=true;
 	}
-
 	void zatvoriVeze() {
 		try {
 			ulazniTok.close();
@@ -152,15 +132,24 @@ public class Igrac implements Runnable {
 		}
 
 	}
-
-	void cekajOdgovor() {
-		aktivnaNit = true;
-		// notify();
+	boolean hoceDaPovucePoziv(String komanda) {
+		return komanda.equals(POVUCI_POZIV);
 	}
-
-	void pokusajPonovnuIgru() {
-		hocePonovo = true;
-	//	igra.notify();
-		igraj();
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Igrac))
+			return false;
+		Igrac i = (Igrac) o;
+		return ime.equals(i.ime);
 	}
+	@Override
+	public String toString() {
+		return ime;
+	}
+	
+	
+	
+
+	
+	
 }

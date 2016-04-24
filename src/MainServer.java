@@ -65,6 +65,10 @@ public class MainServer {
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]!=null && igre[i].equals(igra)){
 				igre[i]=new Igra(igra.igrac1,igra.igrac2,!igra.igrac1PocinjeIgru);
+				igra.igrac1.igraj();
+				igra.igrac2.igraj();
+				igre[i].pocni();
+				break;
 			}
 		}
 	}
