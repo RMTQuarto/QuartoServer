@@ -48,8 +48,7 @@ public class MainServer {
 		Igrac igr1=nadjiIgraca(igrac1);
 		Igrac igr2=nadjiIgraca(igrac2);
 		for (int i = 0; i < igre.length; i++) {
-			if(igre[i]==null){
-				
+			if(igre[i]==null){				
 				igre[i]=new Igra(igr1,igr2);
 				uvediIgraceUIgru(igre[i],igr1,igr2);
 				posaljiListuSlobodnihIgraca();

@@ -160,7 +160,7 @@ public class Igrac implements Runnable {
 
 	void pokusajPonovnuIgru() {
 		hocePonovo = true;
-		igra.notify();
+	//	igra.notify();
 		igraj();
 	}
 }
