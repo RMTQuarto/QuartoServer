@@ -27,13 +27,6 @@ public class Figura {
 	public char getVisina() {
 		return visina;
 	}
-
-	public boolean isteFigure(Figura figura) {
-		if(getBoja() == figura.boja || getOblik() == figura.oblik 
-				|| getSupljina() == figura.supljina || getVisina() == figura.visina)
-			return true;
-		return false;
-	}
 	
 	@Override
 	public boolean equals(Object obj) {
