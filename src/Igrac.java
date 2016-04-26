@@ -119,6 +119,7 @@ public class Igrac implements Runnable {
 		aktivnaNit=true;
 	}
 	void igrajPonovo(){
+		aktivnaNit=false;
 		hocePonovo=true;
 	}
 	void zatvoriVeze() {
