@@ -1,8 +1,7 @@
 import java.io.IOException;
 import java.util.Random;
+import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.management.timer.Timer;
 
 public class Igra implements Runnable {
 	Igrac igrac1;
@@ -34,6 +33,8 @@ public class Igra implements Runnable {
 	void inicijalizuj(Igrac igrac1, Igrac igrac2) {
 		this.igrac1 = igrac1;	
 		this.igrac2 = igrac2;
+		igrac1.hocePonovo=null;
+		igrac2.hocePonovo=null;
 		tabla = new Tabla();
 		figure = new Figure();
 		aktivnaNit=true;
@@ -108,17 +109,31 @@ public class Igra implements Runnable {
 			// ne znam sto cekam ovde iz nekog slucaja nece da radi lepo ako se ne ceka
 				wait(1000);
 			
-			posaljiObojiciPoruku(NOVA_IGRA);			
+			posaljiObojiciPoruku(NOVA_IGRA);	
+			boolean odgovorili=false;
+			
 			igrac1.cekajOdgovor();
 			igrac2.cekajOdgovor();
-			
-			   wait(2500);
-			   wait(2500);
-			   
-			if (igrac1.hocePonovo && igrac2.hocePonovo) {
+			Timer tajmer=new Timer();
+			tajmer.schedule(new TimerTask() {
+				
+				@Override
+				public void run() {
+					igrac1.hocePonovo=false;
+					igrac2.hocePonovo=false;
+				}
+			}
+				
+			, 5000);
+			while(igrac1.hocePonovo==null || igrac2.hocePonovo==null){
+				
+			}  
+			if (igrac1.hocePonovo.booleanValue() && igrac2.hocePonovo.booleanValue()) {
+				tajmer=null;
 				MainServer.napraviPonovnuIgru(this);
 				throw new KrajIgreException("napravili novu igru");
 			}
+			tajmer=null;
 			zavrsiIgru();
 			throw new KrajIgreException("ne prave igru");
 		}

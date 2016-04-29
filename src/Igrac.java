@@ -21,7 +21,7 @@ public class Igrac implements Runnable {
 	boolean naPotezu;
 	Igra igra;
 	volatile boolean aktivnaNit;
-	volatile boolean hocePonovo;
+	volatile Boolean hocePonovo;
 
 	public Igrac(Socket soket) {
 
@@ -38,7 +38,6 @@ public class Igrac implements Runnable {
 			}
 			MainServer.posaljiListuSlobodnihIgraca();
 			poslaoPoziv = false;
-			hocePonovo=false;
 			aktivnaNit = true;
 			pocni();
 		} catch (IOException e) {
@@ -101,6 +100,7 @@ public class Igrac implements Runnable {
 	}
 	void zavrsiIgru() {
 		igra = null;
+		hocePonovo=null;
 		poslaoPoziv = false;
 		aktivnaNit=true;	
 	}
@@ -120,7 +120,7 @@ public class Igrac implements Runnable {
 	}
 	void igrajPonovo(){
 		aktivnaNit=false;
-		hocePonovo=true;
+		hocePonovo=new Boolean(true);
 	}
 	void zatvoriVeze() {
 		try {
