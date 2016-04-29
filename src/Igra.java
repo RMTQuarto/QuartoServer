@@ -109,31 +109,34 @@ public class Igra implements Runnable {
 			// ne znam sto cekam ovde iz nekog slucaja nece da radi lepo ako se ne ceka
 				wait(1000);
 			
-			posaljiObojiciPoruku(NOVA_IGRA);	
-			boolean odgovorili=false;
+			posaljiObojiciPoruku(NOVA_IGRA);
+			
 			
 			igrac1.cekajOdgovor();
 			igrac2.cekajOdgovor();
+			
 			Timer tajmer=new Timer();
 			tajmer.schedule(new TimerTask() {
 				
 				@Override
 				public void run() {
-					igrac1.hocePonovo=false;
-					igrac2.hocePonovo=false;
+					if(igrac1.hocePonovo==null)
+						igrac1.hocePonovo=false;
+					if(igrac2.hocePonovo==null)
+						igrac2.hocePonovo=false;
 				}
 			}
 				
-			, 5000);
+			, 8000);
 			while(igrac1.hocePonovo==null || igrac2.hocePonovo==null){
 				
 			}  
+			
+			tajmer=null;
 			if (igrac1.hocePonovo.booleanValue() && igrac2.hocePonovo.booleanValue()) {
-				tajmer=null;
 				MainServer.napraviPonovnuIgru(this);
 				throw new KrajIgreException("napravili novu igru");
 			}
-			tajmer=null;
 			zavrsiIgru();
 			throw new KrajIgreException("ne prave igru");
 		}
