@@ -18,6 +18,7 @@ public class Igrac implements Runnable {
 	public static final String POVUCI_POZIV = "POVUCI POZIV";
 	public static final String IGRAJ_PONOVO = "IGRAJ PONOVO";
 	public static final String POZIVNICA_USPESNA="OK";
+	public static final String NECE_PONOVNU_IGRU="N";
 	boolean naPotezu;
 	Igra igra;
 	volatile boolean aktivnaNit;
@@ -65,6 +66,13 @@ public class Igrac implements Runnable {
 					}
 					if (podaciS.equals(POZIVNICA_USPESNA))
 						continue;
+					if(podaciS.equals(NECE_PONOVNU_IGRU)){
+						hocePonovo=new Boolean(false);
+						synchronized(igra){
+							notify();
+						}
+						continue;
+					}
 					if(hocePonovoDaIgra(podaciS)){
 						igrajPonovo();
 						continue;
@@ -121,6 +129,9 @@ public class Igrac implements Runnable {
 	void igrajPonovo(){
 		aktivnaNit=false;
 		hocePonovo=new Boolean(true);
+		synchronized(igra){
+			notify();
+		}
 	}
 	void zatvoriVeze() {
 		try {

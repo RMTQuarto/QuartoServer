@@ -10,10 +10,12 @@ public class Igra implements Runnable {
 	Figure figure;
 	boolean igrac1PocinjeIgru;
 	Thread t;
+	Igra igra;
 	public static final String NERESENO="NERESENO";
 	public static final String POBEDA=" JE POBEDIO";
 	public static final String NOVA_IGRA="NOVA IGRA?";
 	public static final String IGRAS="IGRAS";
+	public static final String NEMA_IGRE="NEMA IGRE";
 	volatile boolean aktivnaNit;
 
 	public Igra(Igrac igrac1, Igrac igrac2) {
@@ -38,6 +40,7 @@ public class Igra implements Runnable {
 		tabla = new Tabla();
 		figure = new Figure();
 		aktivnaNit=true;
+		igra=this;
 	}
 
 	public void pocni() {	
@@ -96,7 +99,7 @@ public class Igra implements Runnable {
 	}
 		
 	}
-	void proveriPobedu(Igrac naPotezu, Igrac ceka) throws KrajIgreException, InterruptedException{
+	private void proveriPobedu(Igrac naPotezu, Igrac ceka) throws KrajIgreException, InterruptedException{
 		if (tabla.partijaJeZavrsena() != 0) {
 			if (tabla.partijaJeZavrsena() == 1) {
 				String pobednik = (naPotezu.naPotezu) ?naPotezu.toString():ceka.toString();
@@ -106,7 +109,7 @@ public class Igra implements Runnable {
 			if (tabla.partijaJeZavrsena() == 2) {
 				posaljiObojiciPoruku(NERESENO);
 			}
-			// ne znam sto cekam ovde iz nekog slucaja nece da radi lepo ako se ne ceka
+			// cekanje zbog nepreklapanja poruka
 				wait(1000);
 			
 			posaljiObojiciPoruku(NOVA_IGRA);
@@ -124,19 +127,29 @@ public class Igra implements Runnable {
 						igrac1.hocePonovo=false;
 					if(igrac2.hocePonovo==null)
 						igrac2.hocePonovo=false;
+					synchronized(igra){
+						notify();
+					}
+					synchronized(igra){
+						notify();
+					}
 				}
 			}
 				
 			, 8000);
+				
+				wait();
+				wait(); 
 			while(igrac1.hocePonovo==null || igrac2.hocePonovo==null){
 				
-			}  
-			
+			}
 			tajmer=null;
 			if (igrac1.hocePonovo.booleanValue() && igrac2.hocePonovo.booleanValue()) {
 				MainServer.napraviPonovnuIgru(this);
 				throw new KrajIgreException("napravili novu igru");
 			}
+			System.out.println("OOOO");
+			posaljiObojiciPoruku(NEMA_IGRE);
 			zavrsiIgru();
 			throw new KrajIgreException("ne prave igru");
 		}
