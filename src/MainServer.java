@@ -4,14 +4,15 @@ import java.net.Socket;
 import java.util.LinkedList;
 
 public class MainServer {
-	public static Igra[] igre = new Igra[5];
-	public static LinkedList<Igrac> igraci=new LinkedList<Igrac>();
 	public static final int BROJ_PORTA=9999;
 	public static final String PORUKE_KONEKTOVANJA="K;";
 	public static final String PORUKE_IGRE="I;";
 	public static final String PORUKE_POZIVANJA_NA_IGRU="P;";
 	public static final String PUN_SERVER="SERVER PUN";
 	public static final String LISTA="L;";
+	
+	public static Igra[] igre = new Igra[5];
+	public static LinkedList<Igrac> igraci=new LinkedList<Igrac>();
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -29,7 +30,7 @@ public class MainServer {
 	}
 	public static void posaljiListuSlobodnihIgraca(){
 		for (Igrac igrac : igraci) {
-			igrac.izlazniTok.println(listaSlobodnihIgraca());
+			igrac.getIzlazniTok().println(listaSlobodnihIgraca());
 		}
 		
 	}
@@ -41,7 +42,7 @@ public class MainServer {
 		return lista;
 	}
 	public static void posaljiPozivnicu(String pozivac, String protivnik){
-		nadjiIgraca(protivnik).izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+pozivac);
+		nadjiIgraca(protivnik).getIzlazniTok().println(PORUKE_POZIVANJA_NA_IGRU+pozivac);
 	}
 	
 	public static void napraviIgru(String igrac1, String igrac2){
@@ -56,17 +57,17 @@ public class MainServer {
 				break;
 			}
 			if(i==igre.length-1){
-				igr1.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+PUN_SERVER);
-				igr2.izlazniTok.println(PORUKE_POZIVANJA_NA_IGRU+PUN_SERVER);
+				igr1.getIzlazniTok().println(PORUKE_POZIVANJA_NA_IGRU+PUN_SERVER);
+				igr2.getIzlazniTok().println(PORUKE_POZIVANJA_NA_IGRU+PUN_SERVER);
 			}
 		}
 	}
 	public static void napraviPonovnuIgru(Igra igra){
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]!=null && igre[i].equals(igra)){
-				igre[i]=new Igra(igra.igrac1,igra.igrac2,!igra.igrac1PocinjeIgru);
-				igra.igrac1.igraj();
-				igra.igrac2.igraj();
+				igre[i]=new Igra(igra.getIgrac1(),igra.getIgrac2(),!igra.isIgrac1PocinjeIgru());
+				igra.getIgrac1().igraj();
+				igra.getIgrac2().igraj();
 				igre[i].pocni();
 				break;
 			}
@@ -75,22 +76,22 @@ public class MainServer {
 	private static void uvediIgraceUIgru(Igra igra,Igrac igr1,Igrac igr2){		
 		igr1.igraj();
 		igr2.igraj();
-		igr1.igra=igra;	
-		igr2.igra=igra;
+		igr1.setIgra(igra);	
+		igr2.setIgra(igra);
 		igraci.remove(igr1);
 		igraci.remove(igr2);	
 	}
 	public static Igrac nadjiIgraca(String ime){
 		for (Igrac igrac : igraci) {
-			if(igrac.ime.equals(ime)){
+			if(igrac.getIme().equals(ime)){
 				return igrac;
 			}
 		}
 		return null;
 	}
 	public static void ukiniIgru(Igra igra){
-		igraci.add(igra.igrac1);
-		igraci.add(igra.igrac2);
+		igraci.add(igra.getIgrac1());
+		igraci.add(igra.getIgrac2());
 		for (int i = 0; i < igre.length; i++) {
 			if(igre[i]!=null && igre[i].equals(igra)){
 				igre[i]=null;

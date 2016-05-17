@@ -5,12 +5,6 @@ import java.io.PrintStream;
 import java.net.Socket;
 
 public class Igrac implements Runnable {
-	Socket soket;
-	BufferedReader ulazniTok;
-	PrintStream izlazniTok;
-	String ime;
-	Thread t;
-	boolean poslaoPoziv;
 	public final static String POZIVAC = "1";
 	public final static String PRIHVACENA_IGRA = "D";
 	public final static String ZAUZETO_IME = "IME ZAUZETO";
@@ -19,10 +13,74 @@ public class Igrac implements Runnable {
 	public static final String IGRAJ_PONOVO = "IGRAJ PONOVO";
 	public static final String POZIVNICA_USPESNA="OK";
 	public static final String NECE_PONOVNU_IGRU="N";
-	boolean naPotezu;
-	Igra igra;
-	volatile boolean aktivnaNit;
-	volatile Boolean hocePonovo;
+	
+	
+	private Socket soket;
+	private BufferedReader ulazniTok;
+	private PrintStream izlazniTok;
+	private String ime;
+	private Thread t;
+	private boolean poslaoPoziv;
+	private boolean naPotezu;
+	private Igra igra;
+	private volatile boolean aktivnaNit;
+	private volatile Boolean hocePonovo;
+	
+	
+	public Boolean getHocePonovo() {
+		return hocePonovo;
+	}
+
+
+
+	public void setHocePonovo(Boolean hocePonovo) {
+		this.hocePonovo = hocePonovo;
+	}
+
+
+
+	public Igra getIgra() {
+		return igra;
+	}
+
+	
+
+	public boolean isNaPotezu() {
+		return naPotezu;
+	}
+
+
+
+	public void setNaPotezu(boolean naPotezu) {
+		this.naPotezu = naPotezu;
+	}
+
+
+
+	public BufferedReader getUlazniTok() {
+		return ulazniTok;
+	}
+
+
+
+	public void setIgra(Igra igra) {
+		this.igra = igra;
+	}
+
+
+
+	public String getIme() {
+		return ime;
+	}
+
+
+
+	public PrintStream getIzlazniTok() {
+		return izlazniTok;
+	}
+
+	
+	
 
 	public Igrac(Socket soket) {
 
@@ -42,13 +100,12 @@ public class Igrac implements Runnable {
 			aktivnaNit = true;
 			pocni();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MainServer.izbaciIgraca(this);
 		}
 
 	}
 
-	void pocni() {
+	private void pocni() {
 		t = new Thread(this, ime);
 		t.setDaemon(true);
 		t.start();
@@ -67,23 +124,20 @@ public class Igrac implements Runnable {
 					if (podaciS.equals(POZIVNICA_USPESNA))
 						continue;
 					if(podaciS.equals(NECE_PONOVNU_IGRU)){
-						hocePonovo=new Boolean(false);
-						synchronized(igra){
-							notify();
-						}
+						odbiPonovnuIgru();
 						continue;
 					}
-					if(hocePonovoDaIgra(podaciS)){
+					if(podaciS.equals(IGRAJ_PONOVO)){
 						igrajPonovo();
 						continue;
 					}
-					if (hoceDaSeDiskonektuje(podaciS)) {
+					if (podaciS.equals(DISKONEKTOVANJE)) {
 						zatvoriVeze();
 						MainServer.izbaciIgraca(this);
 						return;
 					}
 					if (poslaoPoziv) {
-						if (hoceDaPovucePoziv(podaciS)) {
+						if (podaciS.equals(POVUCI_POZIV)) {
 							poslaoPoziv = false;
 						}
 						continue;
@@ -106,46 +160,43 @@ public class Igrac implements Runnable {
 			MainServer.izbaciIgraca(this);
 		}
 	}
-	void zavrsiIgru() {
+	public void zavrsiIgru() {
 		igra = null;
 		hocePonovo=null;
 		poslaoPoziv = false;
 		aktivnaNit=true;	
 	}
 
-	void igraj() {
+	public void igraj() {
 		aktivnaNit = false;
 	}
 
-	boolean hoceDaSeDiskonektuje(String komanda) {
-		return komanda.equals(DISKONEKTOVANJE);
-	}
-	boolean hocePonovoDaIgra(String odgovor) {
-		return odgovor.equals(IGRAJ_PONOVO);
-	}
-	void cekajOdgovor(){
+	public void cekajOdgovor(){
 		aktivnaNit=true;
 	}
-	void igrajPonovo(){
+	private void odbiPonovnuIgru(){
+		aktivnaNit=false;
+		hocePonovo=new Boolean(false);
+//		synchronized(igra){
+//			igra.notify();
+//		}
+	}
+	private void igrajPonovo(){
 		aktivnaNit=false;
 		hocePonovo=new Boolean(true);
-		synchronized(igra){
-			notify();
-		}
+//		synchronized(igra){
+//			igra.notify();
+//		}
 	}
-	void zatvoriVeze() {
+	public void zatvoriVeze() {
 		try {
 			ulazniTok.close();
 			izlazniTok.close();
 			soket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MainServer.izbaciIgraca(this);
 		}
 
-	}
-	boolean hoceDaPovucePoziv(String komanda) {
-		return komanda.equals(POVUCI_POZIV);
 	}
 	@Override
 	public boolean equals(Object o) {

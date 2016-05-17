@@ -4,25 +4,30 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Igra implements Runnable {
-	Igrac igrac1;
-	Igrac igrac2;
-	Tabla tabla;
-	Figure figure;
-	boolean igrac1PocinjeIgru;
-	Thread t;
-	Igra igra;
-	public static final String NERESENO="NERESENO";
-	public static final String POBEDA=" JE POBEDIO";
-	public static final String NOVA_IGRA="NOVA IGRA?";
-	public static final String IGRAS="IGRAS";
-	public static final String NEMA_IGRE="NEMA IGRE";
-	volatile boolean aktivnaNit;
+	public static final String NERESENO = "NERESENO";
+	public static final String POBEDA = " JE POBEDIO";
+	public static final String NOVA_IGRA = "NOVA IGRA?";
+	public static final String IGRAS = "IGRAS";
+	public static final String NEMA_IGRE = "NEMA IGRE";
+	public static final String POCELA_IGRA = "POCELA IGRA";
+	
+	
+	
+	private Igrac igrac1;
+	private Igrac igrac2;
+	private Tabla tabla;
+	private Figure figure;
+	private boolean igrac1PocinjeIgru;
+	private Thread t;
+	private volatile boolean aktivnaNit;
 
+	
+	
 	public Igra(Igrac igrac1, Igrac igrac2) {
 		inicijalizuj(igrac1, igrac2);
-		igrac1.izlazniTok.println(MainServer.PORUKE_POZIVANJA_NA_IGRU+Igrac.PRIHVACENA_IGRA);
+		igrac1.getIzlazniTok().println(MainServer.PORUKE_POZIVANJA_NA_IGRU + Igrac.PRIHVACENA_IGRA);
 		Random r = new Random();
-		igrac1PocinjeIgru = (r.nextFloat() < 0.5) ? true : false;	
+		igrac1PocinjeIgru = (r.nextFloat() < 0.5) ? true : false;
 		podesiRedosled(igrac1PocinjeIgru);
 	}
 
@@ -32,185 +37,186 @@ public class Igra implements Runnable {
 		podesiRedosled(igrac1PocinjeIgru);
 	}
 
-	void inicijalizuj(Igrac igrac1, Igrac igrac2) {
-		this.igrac1 = igrac1;	
+	private void inicijalizuj(Igrac igrac1, Igrac igrac2) {
+		this.igrac1 = igrac1;
 		this.igrac2 = igrac2;
-		igrac1.hocePonovo=null;
-		igrac2.hocePonovo=null;
+		igrac1.setHocePonovo(null);
+		igrac2.setHocePonovo(null);;
 		tabla = new Tabla();
 		figure = new Figure();
-		aktivnaNit=true;
-		igra=this;
+		aktivnaNit = true;
 	}
 
-	public void pocni() {	
-		t = new Thread(this,igrac1.ime+igrac2.ime);
+	public Igrac getIgrac1() {
+		return igrac1;
+	}
+
+	public Igrac getIgrac2() {
+		return igrac2;
+	}
+
+	public boolean isIgrac1PocinjeIgru() {
+		return igrac1PocinjeIgru;
+	}
+
+	public void pocni() {
+		t = new Thread(this, igrac1.getIme() + igrac2.getIme());
 		t.setDaemon(true);
-		t.start();	
-		
+		t.start();
+
 	}
 
 	public synchronized void run() {
-		// debug na serveru
-		if(igrac1PocinjeIgru){
-			System.out.println(igrac1);
-		}else System.out.println(igrac2);
-		
-		
-		try{
-			//cekanje zbog nepreklapanja poruka
-			wait(1000);
-		if (igrac1.naPotezu) {
-			igrac1.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
-			omoguciProtivnikuDaIgra(igrac1, igrac2);
-		} else {
-			igrac2.izlazniTok.println(MainServer.PORUKE_IGRE+IGRAS);
-			omoguciProtivnikuDaIgra(igrac2, igrac1);
-		}
-		
-		while (true) {
-			
-			if(aktivnaNit){
-			if (igrac1.naPotezu) {
-			
-				staviFiguruNaTablu(igrac1,igrac2);
-				proveriPobedu(igrac1,igrac2);
+//		// debug na serveru
+//		if (igrac1PocinjeIgru) {
+//			System.out.println(igrac1);
+//		} else
+//			System.out.println(igrac2);
+
+		try {
+			// cekanje zbog preklapanja poruka
+			wait(200);
+			posaljiObojiciPoruku(POCELA_IGRA);
+			wait(200);
+			if (igrac1.isNaPotezu()) {
+				igrac1.getIzlazniTok().println(MainServer.PORUKE_IGRE + IGRAS);
 				omoguciProtivnikuDaIgra(igrac1, igrac2);
 			} else {
-			
-				staviFiguruNaTablu(igrac2,igrac1);
-				proveriPobedu(igrac2,igrac1);
+				igrac2.getIzlazniTok().println(MainServer.PORUKE_IGRE + IGRAS);
 				omoguciProtivnikuDaIgra(igrac2, igrac1);
 			}
+
+			while (true) {
+
+				if (aktivnaNit) {
+					if (igrac1.isNaPotezu()) {
+
+						staviFiguruNaTablu(igrac1, igrac2);
+						proveriPobedu(igrac1, igrac2);
+						omoguciProtivnikuDaIgra(igrac1, igrac2);
+					} else {
+
+						staviFiguruNaTablu(igrac2, igrac1);
+						proveriPobedu(igrac2, igrac1);
+						omoguciProtivnikuDaIgra(igrac2, igrac1);
+					}
+				}
+
+			}
+		}catch(ArrayIndexOutOfBoundsException e){
+			zavrsiIgru();
+			igrac1.zatvoriVeze();
+			igrac2.zatvoriVeze();
+			MainServer.izbaciIgraca(igrac1);
+			MainServer.izbaciIgraca(igrac2);
+		} 
+		catch(NullPointerException e){
+			zavrsiIgru();
+			igrac1.zatvoriVeze();
+			igrac2.zatvoriVeze();
+			MainServer.izbaciIgraca(igrac1);
+			MainServer.izbaciIgraca(igrac2);
+		}catch (IOException e) {
+			igrac1.zavrsiIgru();
+			igrac2.zavrsiIgru();
+			igrac1.zatvoriVeze();
+			igrac2.zatvoriVeze();
+			MainServer.izbaciIgraca(igrac1);
+			MainServer.izbaciIgraca(igrac2);
+		} catch (KrajIgreException e) {
+			return;
+		} catch (InterruptedException e) {
+			return;
 		}
-			
-		}
-	} catch (IOException e) {
-		igrac1.zavrsiIgru();
-		igrac2.zavrsiIgru();
-		igrac1.zatvoriVeze();
-		igrac2.zatvoriVeze();
-		MainServer.izbaciIgraca(igrac1);
-		MainServer.izbaciIgraca(igrac2);
-	} catch (KrajIgreException e){
-		return;
-	} catch(InterruptedException e){
-		return;
+
 	}
-		
-	}
-	private void proveriPobedu(Igrac naPotezu, Igrac ceka) throws KrajIgreException, InterruptedException{
+
+	private void proveriPobedu(Igrac naPotezu, Igrac ceka) throws KrajIgreException, InterruptedException {
 		if (tabla.partijaJeZavrsena() != 0) {
 			if (tabla.partijaJeZavrsena() == 1) {
-				String pobednik = (naPotezu.naPotezu) ?naPotezu.toString():ceka.toString();
-				
-				posaljiObojiciPoruku(pobednik+POBEDA);
+				String pobednik = (naPotezu.isNaPotezu()) ? naPotezu.toString() : ceka.toString();
+
+				posaljiObojiciPoruku(pobednik + POBEDA);
 			}
 			if (tabla.partijaJeZavrsena() == 2) {
 				posaljiObojiciPoruku(NERESENO);
 			}
-			// cekanje zbog nepreklapanja poruka
-				wait(1000);
-			
+			// cekanje zbog preklapanja poruka
+			wait(200);
+
 			posaljiObojiciPoruku(NOVA_IGRA);
-			
-			
+
 			igrac1.cekajOdgovor();
 			igrac2.cekajOdgovor();
+
+//			synchronized(this){
+//				wait();
+//			}
+//			synchronized(this){
+//				wait();
+//			}
+			while(igrac1.getHocePonovo()==null || igrac2.getHocePonovo()==null){
+				
+			}
+
 			
-			Timer tajmer=new Timer();
-			tajmer.schedule(new TimerTask() {
-				
-				@Override
-				public void run() {
-					if(igrac1.hocePonovo==null)
-						igrac1.hocePonovo=false;
-					if(igrac2.hocePonovo==null)
-						igrac2.hocePonovo=false;
-					synchronized(igra){
-						notify();
-					}
-					synchronized(igra){
-						notify();
-					}
-				}
-			}
-				
-			, 8000);
-				
-				wait();
-				wait(); 
-			while(igrac1.hocePonovo==null || igrac2.hocePonovo==null){
-				
-			}
-			tajmer=null;
-			if (igrac1.hocePonovo.booleanValue() && igrac2.hocePonovo.booleanValue()) {
+			if (igrac1.getHocePonovo().booleanValue() && igrac2.getHocePonovo().booleanValue()) {
 				MainServer.napraviPonovnuIgru(this);
 				throw new KrajIgreException("napravili novu igru");
 			}
-			System.out.println("OOOO");
 			posaljiObojiciPoruku(NEMA_IGRE);
 			zavrsiIgru();
 			throw new KrajIgreException("ne prave igru");
 		}
 	}
-	void omoguciProtivnikuDaIgra(Igrac naPotezu, Igrac ceka) throws IOException{
+
+	private void omoguciProtivnikuDaIgra(Igrac naPotezu, Igrac ceka) throws IOException {
 		izaberiFiguruZaProtivnika(naPotezu, ceka);
 		podesiRedosled();
-	
+
 	}
 
-	public void posaljiObojiciPoruku(Object o) {
-		igrac1.izlazniTok.println(MainServer.PORUKE_IGRE+o);
-		igrac2.izlazniTok.println(MainServer.PORUKE_IGRE+o);
+	private void posaljiObojiciPoruku(Object o) {
+		igrac1.getIzlazniTok().println(MainServer.PORUKE_IGRE + o);
+		igrac2.getIzlazniTok().println(MainServer.PORUKE_IGRE + o);
 	}
 
-	void podesiRedosled(boolean naPotezu) {
-		igrac1.naPotezu = naPotezu;
-		igrac2.naPotezu = !naPotezu;
-	}
-	void podesiRedosled() {
-		igrac1.naPotezu = !igrac1.naPotezu;
-		igrac2.naPotezu = !igrac2.naPotezu;
+	private void podesiRedosled(boolean naPotezu) {
+		igrac1.setNaPotezu(naPotezu);
+		igrac2.setNaPotezu(!naPotezu);
 	}
 
-	void staviFiguruNaTablu(Igrac naPotezu,Igrac ceka) throws IOException {		
-			String potezS=naPotezu.ulazniTok.readLine();
-			if(potezS==null){
-				MainServer.izbaciIgraca(naPotezu);
-				return;
-				//posalji poruku da se prekine igra
-			}			
-			String[] potez = potezS.split(";");
-			String figura = potez[0];
-			String pozicija = potez[1];
-			tabla.postaviFiguruNaPolje(figura.charAt(0), figura.charAt(1), figura.charAt(2), figura.charAt(3),
-					pozicija.charAt(0), pozicija.charAt(1));
-			ceka.izlazniTok.println(MainServer.PORUKE_IGRE+potezS);
+	private void podesiRedosled() {
+		podesiRedosled(!igrac1.isNaPotezu());
 	}
 
-	void izaberiFiguruZaProtivnika(Igrac naPotezu, Igrac ceka) throws IOException{
-		
-			String 	figura = naPotezu.ulazniTok.readLine();
-			if(figura==null){
-				MainServer.izbaciIgraca(naPotezu);
-				return;
-				//posalji poruku da se prekine igra
-			}
-			figure.izbaciFiguru(figure.nadjiFiguru(figura));
-			ceka.izlazniTok.println(MainServer.PORUKE_IGRE+figura);
-		
+	private void staviFiguruNaTablu(Igrac naPotezu, Igrac ceka) throws IOException {
+		String potezS = naPotezu.getUlazniTok().readLine();
+		String[] potez = potezS.split(";");
+		String figura = potez[0];
+		String pozicija = potez[1];
+		tabla.postaviFiguruNaPolje(figura.charAt(0), figura.charAt(1), figura.charAt(2), figura.charAt(3),
+				pozicija.charAt(0), pozicija.charAt(1));
+		ceka.getIzlazniTok().println(MainServer.PORUKE_IGRE + potezS);
 	}
 
-	void zavrsiIgru() {
+	private void izaberiFiguruZaProtivnika(Igrac naPotezu, Igrac ceka) throws IOException {
+
+		String figura = naPotezu.getUlazniTok().readLine();
+		figure.izbaciFiguru(figure.nadjiFiguru(figura));
+		ceka.getIzlazniTok().println(MainServer.PORUKE_IGRE + figura);
+
+	}
+
+	private void zavrsiIgru() {
 		igrac1.zavrsiIgru();
 		igrac2.zavrsiIgru();
 		MainServer.ukiniIgru(this);
 	}
-	
-	class KrajIgreException extends RuntimeException{
-		
-		public KrajIgreException(String poruka){
+
+	private class KrajIgreException extends RuntimeException {
+
+		public KrajIgreException(String poruka) {
 			super(poruka);
 		}
 	}
